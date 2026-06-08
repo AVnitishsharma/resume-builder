@@ -9,11 +9,11 @@ const resumeSchema = new mongoose.Schema<IResume>({
   },
   title: {
     type: String,
-    default:""
+    default: ""
   },
   summary: {
     type: String,
-    default:""
+    default: ""
   },
   personalInfo: {
     type: {
@@ -25,10 +25,10 @@ const resumeSchema = new mongoose.Schema<IResume>({
       linkedin: String,
       portfolio: String,
     },
-    default:{}
+    default: {}
   },
   workExperience: {
-    type:[
+    type: [
       {
         company: String,
         position: String,
@@ -38,10 +38,10 @@ const resumeSchema = new mongoose.Schema<IResume>({
         achievements: [String],
       }
     ],
-    default:[],
+    default: [],
   },
   projects: {
-    type:[
+    type: [
       {
         title: String,
         description: String,
@@ -50,14 +50,14 @@ const resumeSchema = new mongoose.Schema<IResume>({
         techStack: [String],
       }
     ],
-    default:[],
+    default: [],
   },
   skills: {
-    type:[String],
-    default:[],
+    type: [String],
+    default: [],
   },
   education: {
-    type:[
+    type: [
       {
         degree: String,
         institution: String,
@@ -65,15 +65,15 @@ const resumeSchema = new mongoose.Schema<IResume>({
         endDate: String,
       }
     ],
-    default:[],
+    default: [],
   },
   certificates: {
-    type:[String],
-    default:[],
+    type: [String],
+    default: [],
   },
-},{
+}, {
   timestamps: true,
 });
 
-export const ResumeModel = mongoose.model("Resume", resumeSchema);
+export const ResumeModel = mongoose.models.resume || mongoose.model("resume", resumeSchema);
 export default ResumeModel;

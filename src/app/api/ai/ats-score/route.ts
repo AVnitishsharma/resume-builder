@@ -3,13 +3,13 @@ import { IGenrateAtsScoreBody } from "@/types/ai.types";
 import { APIResponse } from "@/types/api.types";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req:NextRequest) {
+export async function POST(req: NextRequest) {
   try {
 
-    const body:IGenrateAtsScoreBody = await req.json();
+    const body: IGenrateAtsScoreBody = await req.json();
     const { resumeText } = body;
 
-    if(!resumeText) {
+    if (!resumeText) {
       return NextResponse.json<APIResponse>({
         message: "All fields are required",
         success: false,
@@ -60,19 +60,31 @@ export async function POST(req:NextRequest) {
       }
         
       Generate ATS analysis now.
-      Return ONLY a single number between 0 and 100.
-      No JSON, no text, no explanation.
     `;
 
     const result = await gentrateAiContent(prompt);
-    const atsScore = result!.trim();
+
+    // Attempt to parse JSON from AI response
+    let analysis;
+    try {
+      const cleanResult = result!.replace(/```json|```/g, "").trim();
+      analysis = JSON.parse(cleanResult);
+    } catch (e) {
+      // Fallback if AI doesn't return valid JSON
+      analysis = {
+        atsScore: parseInt(result!.match(/\d+/)?.[0] || "0"),
+        summary: "Analysis generated successfully.",
+        strengths: ["Content provided"],
+        improvements: ["Optimize for specific job descriptions"]
+      };
+    }
 
     return NextResponse.json<APIResponse>({
       message: "ATS score generated successfully",
       success: true,
-      data: { atsScore },
+      data: analysis,
     }, { status: 200 });
-    
+
   } catch (error) {
     console.log("Error generating ATS score:-", error);
     return NextResponse.json<APIResponse>({
