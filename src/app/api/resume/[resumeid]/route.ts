@@ -4,7 +4,8 @@ import ResumeModel from "@/models/resume.models";
 import { APIResponse } from "@/types/api.types";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function GET(req:NextRequest, {params}:{params:Promise<{resumeid:string}>}) {
+// get resume by id
+export async function GET(req: NextRequest, { params }: { params: Promise<{ resumeid: string }> }) {
   try {
 
     await connectDB();
@@ -36,8 +37,8 @@ export async function GET(req:NextRequest, {params}:{params:Promise<{resumeid:st
   }
 }
 
-
-export async function PATCH(req:NextRequest, {params}:{params:Promise<{resumeid:string}>}) {
+// update resume by id
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ resumeid: string }> }) {
   try {
 
     await connectDB();
@@ -48,14 +49,14 @@ export async function PATCH(req:NextRequest, {params}:{params:Promise<{resumeid:
 
 
     const updatedResume = await ResumeModel.findOneAndUpdate(
-      { 
+      {
         _id: resumeId,
-        user_id: userId 
+        user_id: userId
       }, {
-        $set: body
-      }, {
-        new: true
-      }
+      $set: body
+    }, {
+      new: true
+    }
     );
 
     if (!updatedResume) {
@@ -71,7 +72,7 @@ export async function PATCH(req:NextRequest, {params}:{params:Promise<{resumeid:
       data: updatedResume,
     }, { status: 200 });
 
-    
+
   } catch (error) {
     console.log("Error updating resume:-", error);
     return NextResponse.json<APIResponse>({

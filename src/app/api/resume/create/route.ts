@@ -4,22 +4,25 @@ import ResumeModel from "@/models/resume.models";
 import { APIResponse } from "@/types/api.types";
 import { NextRequest, NextResponse } from "next/server";
 
-export async function POST(req:NextRequest) {
+export async function POST(req: NextRequest) {
   try {
     await connectDB();
-    
+
     const userId = await currentUser();
 
-    const newResume = await ResumeModel.create({ 
+    const body = await req.json();
+    const { title, summary, personalInfo, workExperience, projects, skills, education, certificates } = body;
+
+    const newResume = await ResumeModel.create({
       user_id: userId,
-      title: "",
-      summary: "",
-      personalInfo: {},
-      workExperience: [],
-      projects: [],
-      skills: [],
-      education: [],
-      certificates: [],
+      title: title || "",
+      summary: summary || "",
+      personalInfo: personalInfo || {},
+      workExperience: workExperience || [],
+      projects: projects || [],
+      skills: skills || [],
+      education: education || [],
+      certificates: certificates || [],
     });
 
     return NextResponse.json<APIResponse>({
@@ -36,6 +39,6 @@ export async function POST(req:NextRequest) {
       success: false,
       error: String(error),
     }, { status: 500 });
-  
+
   }
 }
