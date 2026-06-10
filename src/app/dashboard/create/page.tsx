@@ -19,6 +19,7 @@ interface ResumeFormData {
         techStack: string[];
     }[];
     certificates: string[];
+    experienceLevel: string;
 }
 
 const STEPS = [
@@ -58,7 +59,8 @@ export default function CreateResumePage() {
         workExperience: [],
         skills: [],
         projects: [],
-        certificates: []
+        certificates: [],
+        experienceLevel: "Entry Level"
     });
 
     useEffect(() => {
@@ -90,16 +92,90 @@ export default function CreateResumePage() {
     const handleAiGenerate = async () => {
         setAiLoading(true);
         try {
-            const prompt = `Generate a professional resume summary for a ${formData.title} with the following skills: ${formData.skills.join(', ')}. My name is ${formData.personalInfo.fullName}.`;
-            const response = await apiRequest('/api/ai', {
+            const response = await apiRequest('/api/ai/genrate-summary', {
                 method: 'POST',
-                body: JSON.stringify({ prompt }),
+                body: JSON.stringify({
+                    experienceLevel: formData.experienceLevel,
+                    skills: formData.skills,
+                    jobTitle: formData.title
+                }),
             });
             if (response.success) {
-                setFormData({ ...formData, summary: response.data });
+                setFormData({ ...formData, summary: response.data.summary || response.data });
             }
         } catch (err) {
             alert("AI generation failed");
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    const handleGenerateExperience = async (index: number) => {
+        setAiLoading(true);
+        try {
+            const exp = formData.workExperience[index];
+            const response = await apiRequest('/api/ai/genrate-exprience-description', {
+                method: 'POST',
+                body: JSON.stringify({
+                    jobRole: exp.position,
+                    experienceLevel: formData.experienceLevel,
+                    techStack: formData.skills, // Using general skills as tech stack context
+                    yearOfExperience: 2 // Defaulting or could prompt
+                }),
+            });
+            if (response.success) {
+                const newExp = [...formData.workExperience];
+                newExp[index].responsibilities = [response.data.experienceDescription];
+                setFormData({ ...formData, workExperience: newExp });
+            }
+        } catch (err) {
+            alert("Experience generation failed");
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    const handleGenerateProject = async (index: number) => {
+        setAiLoading(true);
+        try {
+            const proj = formData.projects[index];
+            const response = await apiRequest('/api/ai/genrate-project-description', {
+                method: 'POST',
+                body: JSON.stringify({
+                    jobTitle: formData.title,
+                    experienceLevel: formData.experienceLevel,
+                    techStack: proj.techStack
+                }),
+            });
+            if (response.success) {
+                const newProj = [...formData.projects];
+                newProj[index].description = response.data.projectDescription;
+                setFormData({ ...formData, projects: newProj });
+            }
+        } catch (err) {
+            alert("Project generation failed");
+        } finally {
+            setAiLoading(false);
+        }
+    };
+
+    const handleSuggestSkills = async () => {
+        setAiLoading(true);
+        try {
+            const response = await apiRequest('/api/ai/genrate-skills', {
+                method: 'POST',
+                body: JSON.stringify({
+                    jobTitle: formData.title,
+                    experienceLevel: formData.experienceLevel
+                }),
+            });
+            if (response.success) {
+                // Assuming response.data.skills is an array
+                const suggestedSkills = response.data.skills || [];
+                setFormData({ ...formData, skills: Array.from(new Set([...formData.skills, ...suggestedSkills])) });
+            }
+        } catch (err) {
+            alert("Skill suggestion failed");
         } finally {
             setAiLoading(false);
         }
@@ -259,6 +335,20 @@ export default function CreateResumePage() {
                                         className="w-full bg-white/5 border border-white/10 rounded-xl p-3 focus:ring-2 focus:ring-accent outline-none"
                                     />
                                 </div>
+                                <div className="space-y-2 md:col-span-2">
+                                    <label className="text-sm font-medium text-gray-400">Experience Level</label>
+                                    <select
+                                        value={formData.experienceLevel}
+                                        onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
+                                        className="w-full bg-white/5 border border-white/10 rounded-xl p-3 focus:ring-2 focus:ring-accent outline-none text-gray-200"
+                                    >
+                                        <option value="Entry Level" className="bg-[#1a1a1a]">Entry Level</option>
+                                        <option value="Associate" className="bg-[#1a1a1a]">Associate</option>
+                                        <option value="Mid-Senior Level" className="bg-[#1a1a1a]">Mid-Senior Level</option>
+                                        <option value="Senior" className="bg-[#1a1a1a]">Senior</option>
+                                        <option value="Lead/Director" className="bg-[#1a1a1a]">Lead/Director</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -357,7 +447,21 @@ export default function CreateResumePage() {
                             </div>
 
                             {formData.workExperience.map((exp: any, index: number) => (
-                                <div key={index} className="space-y-4 p-6 border border-white/5 rounded-2xl relative bg-white/5">
+                                <div key={index} className="space-y-6 p-6 border border-white/5 rounded-2xl relative bg-white/5">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="text-sm font-bold text-accent">Experience #{index + 1}</h3>
+                                        <button
+                                            onClick={() => handleGenerateExperience(index)}
+                                            disabled={aiLoading}
+                                            className="text-[10px] font-bold text-accent/80 hover:text-accent bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 transition-all flex items-center space-x-1"
+                                        >
+                                            {aiLoading ? (
+                                                <div className="w-3 h-3 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                                            ) : (
+                                                <span>✨ AI Generate Description</span>
+                                            )}
+                                        </button>
+                                    </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] uppercase font-bold text-gray-500">Company</label>
@@ -486,7 +590,21 @@ export default function CreateResumePage() {
                             </div>
 
                             {formData.projects.map((proj, index) => (
-                                <div key={index} className="space-y-4 p-6 border border-white/5 rounded-2xl relative bg-white/5">
+                                <div key={index} className="space-y-6 p-6 border border-white/5 rounded-2xl relative bg-white/5">
+                                    <div className="flex justify-between items-start">
+                                        <h3 className="text-sm font-bold text-accent">Project #{index + 1}</h3>
+                                        <button
+                                            onClick={() => handleGenerateProject(index)}
+                                            disabled={aiLoading}
+                                            className="text-[10px] font-bold text-accent/80 hover:text-accent bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 transition-all flex items-center space-x-1"
+                                        >
+                                            {aiLoading ? (
+                                                <div className="w-3 h-3 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                                            ) : (
+                                                <span>✨ AI Generate Description</span>
+                                            )}
+                                        </button>
+                                    </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-1">
                                             <label className="text-[10px] uppercase font-bold text-gray-500">Project Title</label>
@@ -556,9 +674,22 @@ export default function CreateResumePage() {
 
                     {currentStep === 5 && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                            <div className="border-b border-white/5 pb-4">
-                                <h2 className="text-2xl font-bold">Skills</h2>
-                                <p className="text-gray-400 text-sm mt-1">Add your technical and soft skills.</p>
+                            <div className="border-b border-white/5 pb-4 flex justify-between items-end">
+                                <div>
+                                    <h2 className="text-2xl font-bold">Skills</h2>
+                                    <p className="text-gray-400 text-sm mt-1">Add your technical and soft skills.</p>
+                                </div>
+                                <button
+                                    onClick={handleSuggestSkills}
+                                    disabled={aiLoading}
+                                    className="text-[10px] font-bold text-accent/80 hover:text-accent bg-accent/5 px-3 py-1.5 rounded-lg border border-accent/10 transition-all flex items-center space-x-1"
+                                >
+                                    {aiLoading ? (
+                                        <div className="w-3 h-3 border-2 border-accent/30 border-t-accent rounded-full animate-spin" />
+                                    ) : (
+                                        <span>✨ Suggest Skills</span>
+                                    )}
+                                </button>
                             </div>
                             <div className="space-y-4">
                                 <input
@@ -659,7 +790,7 @@ export default function CreateResumePage() {
                         </div>
                     )}
 
-                    {currentStep === 6 && (
+                    {currentStep === 8 && (
                         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 text-center py-10">
                             <div className="w-24 h-24 bg-accent/20 rounded-full flex items-center justify-center mx-auto mb-6 text-accent shadow-2xl shadow-accent/20 animate-bounce">
                                 <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">

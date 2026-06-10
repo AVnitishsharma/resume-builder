@@ -81,3 +81,36 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ re
     }, { status: 500 });
   }
 }
+
+// delete resume by id
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ resumeid: string }> }) {
+  try {
+    await connectDB();
+    const userId = await currentUser();
+    const resumeId = (await params).resumeid;
+
+    const deletedResume = await ResumeModel.findOneAndDelete({
+      _id: resumeId,
+      user_id: userId
+    });
+
+    if (!deletedResume) {
+      return NextResponse.json<APIResponse>({
+        message: "Resume not found",
+        success: false,
+      }, { status: 404 });
+    }
+
+    return NextResponse.json<APIResponse>({
+      message: "Resume deleted successfully",
+      success: true,
+    }, { status: 200 });
+
+  } catch (error) {
+    console.log("Error deleting resume:-", error);
+    return NextResponse.json<APIResponse>({
+      message: "Error deleting resume",
+      success: false,
+    }, { status: 500 });
+  }
+}

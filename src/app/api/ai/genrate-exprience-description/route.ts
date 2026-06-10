@@ -17,35 +17,35 @@ export async function POST(req:NextRequest) {
     }
 
     const prompt = `
-You are an expert resume writer, career coach, and ATS optimization specialist.
+      You are an expert resume writer, career coach, and ATS optimization specialist.
 
-Generate a professional work experience description based on the provided details.
+      Generate a professional work experience description based on the provided details.
 
-Input:
-- Job Role: ${jobRole}
-- Experience Level: ${experienceLevel}
-- Years of Experience: ${yearOfExperience}
-- Tech Stack: ${techStack.join(", ")}
+      Input:
+      - Job Role: ${jobRole}
+      - Experience Level: ${experienceLevel}
+      - Years of Experience: ${yearOfExperience}
+      - Tech Stack: ${techStack.join(", ")}
 
-STRICT RULES:
-- Return ONLY a single professional experience description paragraph.
-- Do NOT include headings, bullet points, labels, markdown, or explanations.
-- Length must be between 90 and 140 words.
-- Write in past tense as real job experience.
-- Make it realistic, industry-appropriate, and ATS-friendly.
-- Naturally integrate the provided job role and tech stack.
-- Focus on responsibilities, technical contributions, and impact based on the job role.
-- Adjust depth based on years of experience:
-  - 0–1 years: learning, assisting, basic implementation.
-  - 1–3 years: feature development, API creation, debugging, optimization.
-  - 3–5+ years: ownership, system design, scalability, architecture decisions.
-- Use strong action verbs like Developed, Designed, Implemented, Built, Optimized, Integrated, Maintained.
-- Do NOT exaggerate beyond realistic experience level.
-- Ensure ATS-friendly keywords are included naturally.
-- Output plain text only.
+      STRICT RULES:
+      - Return ONLY a single professional experience description paragraph.
+      - Do NOT include headings, bullet points, labels, markdown, or explanations.
+      - Length must be between 90 and 140 words.
+      - Write in past tense as real job experience.
+      - Make it realistic, industry-appropriate, and ATS-friendly.
+      - Naturally integrate the provided job role and tech stack.
+      - Focus on responsibilities, technical contributions, and impact based on the job role.
+      - Adjust depth based on years of experience:
+        - 0–1 years: learning, assisting, basic implementation.
+        - 1–3 years: feature development, API creation, debugging, optimization.
+        - 3–5+ years: ownership, system design, scalability, architecture decisions.
+      - Use strong action verbs like Developed, Designed, Implemented, Built, Optimized, Integrated, Maintained.
+      - Do NOT exaggerate beyond realistic experience level.
+      - Ensure ATS-friendly keywords are included naturally.
+      - Output plain text only.
 
-Generate the experience description now.
-`;
+      Generate the experience description now.
+    `;
 
     const result = await gentrateAiContent(prompt);
     const experienceDescription = result!.trim();
