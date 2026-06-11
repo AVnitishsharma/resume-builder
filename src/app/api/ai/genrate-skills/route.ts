@@ -17,30 +17,36 @@ export async function POST(req:NextRequest) {
     }
 
       const prompt = `
-        You are an expert technical recruiter and ATS resume specialist.
+You are an expert technical recruiter and ATS resume specialist.
 
-        Generate a list of relevant technical skills for the following role.
+Generate a list of ATS-optimized technical skills strictly relevant to the specified role.
 
-        Job Title: ${jobTitle}
-        Experience Level: ${experienceLevel}
+Job Title: ${jobTitle}
+Experience Level: ${experienceLevel}
 
-        STRICT RULES:
-        - Return ONLY technical skills.
-        - Do NOT include soft skills.
-        - Do NOT include communication, teamwork, leadership, problem-solving, adaptability, or similar skills.
-        - Do NOT include explanations, headings, categories, numbering, or bullet points.
-        - Include only industry-relevant tools, technologies, frameworks, programming languages, databases, cloud platforms, methodologies, and technical concepts.
-        - Prioritize ATS-friendly keywords commonly found in job descriptions.
-        - Generate between 15 and 25 skills.
-        - Remove duplicate skills.
-        - Output as a comma-separated list only.
-        - Output plain text only.
+STRICT RULES:
 
-        Example Output:
-        JavaScript, TypeScript, React, Next.js, Node.js, Express.js, MongoDB, PostgreSQL, REST APIs, GraphQL, Git, Docker, AWS, Tailwind CSS, Redux
+* Return ONLY technical skills.
+* Output as a comma-separated list.
+* Generate between 15 and 25 skills.
+* Remove duplicates.
+* Do NOT include explanations, headings, numbering, bullet points, or categories.
+* Do NOT include soft skills such as communication, teamwork, leadership, adaptability, collaboration, or problem-solving.
+* Include only technologies, frameworks, libraries, tools, platforms, methodologies, and technical concepts directly relevant to the specified role.
+* Prioritize ATS keywords commonly found in job descriptions for the given role and experience level.
+* Do NOT include skills from unrelated domains.
 
-        Generate the technical skills now.
-      `;
+ROLE FILTERING:
+
+* If the role is Frontend Developer, include ONLY frontend technologies, UI development tools, frontend frameworks, styling technologies, testing tools, browser APIs, state management, performance optimization, accessibility, and frontend build tools.
+* Exclude backend technologies such as Node.js, Express.js, NestJS, Spring Boot, Django, Laravel, .NET, MongoDB, PostgreSQL, MySQL, Redis, Kafka, RabbitMQ, Microservices, and Backend APIs unless explicitly part of frontend responsibilities.
+* If the role is Backend Developer, include ONLY backend-related skills.
+* If the role is Full Stack Developer, include both frontend and backend skills.
+* Tailor skill selection according to the experience level.
+
+Output plain text only.
+`;
+
 
     const result = await gentrateAiContent(prompt);
     const skills = result!.trim();

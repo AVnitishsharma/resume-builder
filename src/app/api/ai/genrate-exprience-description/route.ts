@@ -30,7 +30,7 @@ export async function POST(req:NextRequest) {
       STRICT RULES:
       - Return ONLY a single professional experience description paragraph.
       - Do NOT include headings, bullet points, labels, markdown, or explanations.
-      - Length must be between 90 and 140 words.
+      - Length must be between 20 and 40 words.
       - Write in past tense as real job experience.
       - Make it realistic, industry-appropriate, and ATS-friendly.
       - Naturally integrate the provided job role and tech stack.

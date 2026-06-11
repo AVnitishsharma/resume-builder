@@ -14,6 +14,7 @@ interface ResumeFormData {
     projects: {
         title: string;
         description: string;
+        keyFeature: string;
         liveLink?: string;
         github?: string;
         techStack: string[];
@@ -92,12 +93,30 @@ export default function CreateResumePage() {
     const handleAiGenerate = async () => {
         setAiLoading(true);
         try {
+            // Calculate total years of experience
+            let totalMonths = 0;
+            formData.workExperience.forEach(exp => {
+                const [sMonth, sYear] = exp.startDate.split('/').map(Number);
+                const start = new Date(sYear, sMonth - 1);
+                
+                let end = new Date();
+                if (exp.endDate && exp.endDate.toLowerCase() !== 'present') {
+                    const [eMonth, eYear] = exp.endDate.split('/').map(Number);
+                    end = new Date(eYear, eMonth - 1);
+                }
+                
+                const diff = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+                if (diff > 0) totalMonths += diff;
+            });
+            const years = (totalMonths / 12).toFixed(1);
+
             const response = await apiRequest('/api/ai/genrate-summary', {
                 method: 'POST',
                 body: JSON.stringify({
                     experienceLevel: formData.experienceLevel,
                     skills: formData.skills,
-                    jobTitle: formData.title
+                    jobTitle: formData.title,
+                    yearsOfExperience: `${years} years`
                 }),
             });
             if (response.success) {
@@ -142,9 +161,9 @@ export default function CreateResumePage() {
             const response = await apiRequest('/api/ai/genrate-project-description', {
                 method: 'POST',
                 body: JSON.stringify({
-                    jobTitle: formData.title,
-                    experienceLevel: formData.experienceLevel,
-                    techStack: proj.techStack
+                    projectTitle: proj.title,
+                    keyFeature: proj.keyFeature,
+                    techStack: proj.techStack,
                 }),
             });
             if (response.success) {
@@ -170,8 +189,10 @@ export default function CreateResumePage() {
                 }),
             });
             if (response.success) {
-                // Assuming response.data.skills is an array
-                const suggestedSkills = response.data.skills || [];
+                const skillsData = response.data.skills;
+                const suggestedSkills = typeof skillsData === 'string' 
+                    ? skillsData.split(',').map((s: string) => s.trim()).filter(Boolean)
+                    : [];
                 setFormData({ ...formData, skills: Array.from(new Set([...formData.skills, ...suggestedSkills])) });
             }
         } catch (err) {
@@ -581,7 +602,7 @@ export default function CreateResumePage() {
                                 <button
                                     onClick={() => setFormData({
                                         ...formData,
-                                        projects: [...formData.projects, { title: "", description: "", techStack: [], github: "", liveLink: "" }]
+                                        projects: [...formData.projects, { title: "", description: "", keyFeature: "", techStack: [], github: "", liveLink: "" }]
                                     })}
                                     className="text-xs font-bold text-accent uppercase tracking-wider hover:underline"
                                 >
@@ -652,6 +673,19 @@ export default function CreateResumePage() {
                                                     setFormData({ ...formData, projects: newProj });
                                                 }}
                                                 className="w-full bg-transparent p-0 text-sm outline-none border-b border-white/10 focus:border-accent pb-1"
+                                        />
+                                    </div>
+                                    <div className="space-y-1 md:col-span-2">
+                                        <label className="text-[10px] uppercase font-bold text-gray-500">Key Feature</label>
+                                        <input
+                                            value={proj.keyFeature}
+                                            onChange={(e) => {
+                                                const newProj = [...formData.projects];
+                                                newProj[index].keyFeature = e.target.value;
+                                                setFormData({ ...formData, projects: newProj });
+                                            }}
+                                            placeholder="e.g. Real-time notifications, AI-powered analysis (Used for generating description)"
+                                            className="w-full bg-transparent p-0 text-sm outline-none border-b border-white/10 focus:border-accent pb-1"
                                             />
                                         </div>
                                     </div>

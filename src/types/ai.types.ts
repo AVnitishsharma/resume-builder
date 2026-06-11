@@ -2,6 +2,7 @@ export interface IGenerateSummaryBoby {
   experienceLevel: string;
   skills: string[];
   jobTitle: string;
+  yearsOfExperience: string;
 }
 
 export interface IGenrateSkillsBody {
@@ -10,9 +11,9 @@ export interface IGenrateSkillsBody {
 }
 
 export interface IGenrateProjectDescriptionBody {
-  experienceLevel: string;
-  jobTitle: string;
+  projectTitle:string;
   techStack: string[];
+  keyFeature:string;
 }
 
 export interface IGenrateExperienceDescriptionBody {
